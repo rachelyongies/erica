@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Erica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: "Open Sans", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+
+        .open-sans-light {
+            font-family: "Open Sans", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 300;
+            font-style: normal;
+            font-variation-settings:
+                "wdth" 100;
+        }
+
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        #chat-history {
+    height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin; /* Add a thin scrollbar */
+    -ms-overflow-style: none; /* Hide scrollbar in IE and Edge */
+    scrollbar-color: #888 transparent; /* Scrollbar color */
+}
+
+#chat-history::-webkit-scrollbar {
+    width: 5px; /* Width of the scrollbar */
+}
+
+#chat-history::-webkit-scrollbar-track {
+    background: transparent; /* Background of the scrollbar track */
+}
+
+#chat-history::-webkit-scrollbar-thumb {
+    background-color: #888; /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Roundness of the scrollbar thumb */
+}
+
+
+
+        form {
+            display: flex;
+        }
+
+
+
+        .chat-modal {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            width: 700px;
+            height: auto;
+
+
+        }
+
+        input {
+            flex-grow: 1;
+            margin-right: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #send-btn {
+            background-color: #3070d9;
+            color: white;
+            border: none;
+            padding: 10px 10px 10px 10px;
+            border-radius: 5px;
+            width: 50px;
+        }
+
+        .user-message {
+            text-align: right;
+            padding: 10px;
+            background-color: #3070d9;
+            color: white;
+            border-radius: 20px;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .user-message::before {
+            content: "";
+            position: absolute;
+            right: 100%;
+            top: 50%;
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-right: 15px solid #d3eaf7;
+            border-bottom: 10px solid transparent;
+        }
+
+        .bot-message {
+            text-align: left;
+            padding: 10px;
+            background-color: #e3e5e6;
+            border-radius: 20px;
+            margin-bottom: 5px;
+            position: relative;
+            
+        }
+
+
+
+        .bot-message::before {
+            content: "";
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-left: 15px solid #ecf8ff;
+            border-bottom: 10px solid transparent;
+        }
+
+
+        #loader {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-modal">
+        <h2 class="open-sans-light">Welcome to your virtual assistant</h2>
+        <div id="chat-history" class="open-sans-light"></div>
+        <form id="chat-form">
+            <input class="open-sans-light" type="text" id="user-input" placeholder="Ask Erica">
+            <button class="open-sans-light" id="send-btn" type="submit">Send</button>
+        </form>
+    </div>
+    <div id="loader">
+        <img src="loader.gif" width="150px" alt="Loading...">
+      </div>
+    <script>
+        const chatHistory = document.getElementById('chat-history');
+        const userInput = document.getElementById('user-input');
+        const form = document.getElementById('chat-form');
+
+        async function sendMessage() {
+            const userMessage = userInput.value;
+            userInput.value = ''; // Clear input field
+            console.log(userMessage)
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userInput: userMessage }),
+                });
+
+                const data = await response.json();
+                console.log(data)
+                const botMessage = data.response;
+                console.log(botMessage)
+
+                chatHistory.innerHTML += `<div class="user-message">${userMessage}</div>`;
+                chatHistory.innerHTML += `<div class="bot-message">${botMessage}</div>`;
+
+                
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            } catch (error) {
+                console.error('Error:', error);
+                
+            }
+        }
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const loader = document.getElementById('loader');
+            loader.style.display = 'block'; 
+            sendMessage().finally(() => {
+                loader.style.display = 'none'; 
+            });;
+        });
+    </script>
+</body>
+
+</html>
